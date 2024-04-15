@@ -36,7 +36,7 @@ export async function getUserWithPosts(
   });
 }
 
-export async function addUserToCompany(
+export async function assignUserToCompany(
   userId: SelectUser["externalId"],
   companyId: SelectCompany["externalId"]
 ) {

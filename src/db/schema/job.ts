@@ -24,7 +24,10 @@ export const jobs = sqliteTable("jobs", {
 });
 
 export const jobsRelations = relations(jobs, ({ one }) => ({
-  company: one(companies),
+  company: one(companies, {
+    fields: [jobs.companyId],
+    references: [companies.id],
+  }),
 }));
 
 export const insertJobSchema = createInsertSchema(jobs, {

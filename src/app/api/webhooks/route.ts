@@ -2,7 +2,7 @@ import { Webhook } from "svix";
 import { headers } from "next/headers";
 import { WebhookEvent } from "@clerk/nextjs/server";
 import {
-  addUserToCompany,
+  assignUserToCompany,
   createUser,
   deleteUser,
   patchUser,
@@ -113,7 +113,12 @@ export async function POST(req: Request) {
     }
     case "organizationMembership.created": {
       const { public_user_data, organization } = evt.data;
-      await addUserToCompany(public_user_data.user_id, organization.id);
+      await assignUserToCompany(public_user_data.user_id, organization.id);
+      break;
+    }
+    case "organizationMembership.updated": {
+      const { public_user_data, organization } = evt.data;
+      await assignUserToCompany(public_user_data.user_id, organization.id);
       break;
     }
     case "organizationMembership.deleted": {

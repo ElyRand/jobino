@@ -1,11 +1,12 @@
 import { client } from "@/db/db";
-import { SelectPost, posts } from "@/db/schema/post";
 import * as schema from "@/db/schema/user";
+import * as companySchema from "@/db/schema/company";
 import { InsertUser, SelectUser, users } from "@/db/schema/user";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/libsql";
+import { SelectCompany } from "../schema/company";
 
-const db = drizzle(client, { schema });
+const db = drizzle(client, { schema: { ...schema, ...companySchema } });
 
 export async function createUser(data: InsertUser): Promise<void> {
   await db.insert(users).values(data);
@@ -33,4 +34,27 @@ export async function getUserWithPosts(
     },
     where: (users) => eq(users.id, id),
   });
+}
+
+export async function addUserToCompany(
+  userId: SelectUser["externalId"],
+  companyId: SelectCompany["externalId"]
+) {
+  const company = await db.query.companies.findFirst({
+    where: (companies) => eq(companies.externalId, companyId),
+  });
+  if (!company) {
+    throw new Error(`Company with id ${companyId} not found`);
+  }
+  await db
+    .update(users)
+    .set({ companyId: company.id })
+    .where(eq(users.externalId, userId));
+}
+
+export async function removeUserFromCompany(userId: SelectUser["externalId"]) {
+  await db
+    .update(users)
+    .set({ companyId: null })
+    .where(eq(users.externalId, userId));
 }

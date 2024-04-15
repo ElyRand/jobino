@@ -1,7 +1,18 @@
 import { Webhook } from "svix";
 import { headers } from "next/headers";
 import { WebhookEvent } from "@clerk/nextjs/server";
-import { createUser, deleteUser, patchUser } from "@/db/functions/user";
+import {
+  addUserToCompany,
+  createUser,
+  deleteUser,
+  patchUser,
+  removeUserFromCompany,
+} from "@/db/functions/user";
+import {
+  createCompany,
+  deleteCompany,
+  updateCompany,
+} from "@/db/functions/company";
 
 export async function POST(req: Request) {
   // You can find this in the Clerk Dashboard -> Webhooks -> choose the webhook
@@ -79,7 +90,37 @@ export async function POST(req: Request) {
       await deleteUser(id!);
       break;
     }
+    case "organization.created": {
+      const { id, name } = evt.data;
+      await createCompany({
+        externalId: id,
+        name: name,
+      });
+      break;
+    }
+    case "organization.updated": {
+      const { id, name } = evt.data;
+      await updateCompany(id, {
+        externalId: id,
+        name: name,
+      });
+      break;
+    }
+    case "organization.deleted": {
+      const { id } = evt.data;
+      await deleteCompany(id!);
+      break;
+    }
+    case "organizationMembership.created": {
+      const { public_user_data, organization } = evt.data;
+      await addUserToCompany(public_user_data.user_id, organization.id);
+      break;
+    }
+    case "organizationMembership.deleted": {
+      const { public_user_data } = evt.data;
+      await removeUserFromCompany(public_user_data.user_id);
+      break;
+    }
   }
-
   return new Response("", { status: 200 });
 }

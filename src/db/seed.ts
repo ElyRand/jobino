@@ -3,6 +3,7 @@ import "dotenv/config";
 import { drizzle } from "drizzle-orm/libsql";
 import { users } from "./schema/user";
 import { companies } from "./schema/company";
+
 if (!("TURSO_CONNECTION_URL" in process.env))
   throw new Error("TURSO_CONNECTION_URL not found on .env.development");
 

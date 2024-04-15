@@ -11,7 +11,7 @@ export const companies = sqliteTable("companies", {
 
 export const companiesRelations = relations(companies, ({ many }) => ({
   jobs: many(jobs),
-  users: many(users),
+  members: many(users),
 }));
 
 export type InsertCompany = typeof companies.$inferInsert;
